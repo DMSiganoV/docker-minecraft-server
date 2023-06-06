@@ -1,0 +1,62 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# shellcheck source=start-utils
+. "${SCRIPTS:-/}start-utils"
+isDebugging && set -x
+
+: "${CANYON_BUILD:=lastSuccessfulBuild}"
+
+if [ "${VERSION}" != "b1.7.3" ]; then
+  log "ERROR: Canyon server type only supports VERSION=b1.7.3"
+  exit 1
+fi
+
+canyonJob="https://jenkins.glass-launcher.net/job/Canyon"
+githubUrl="https://github.com/KoboDev/SupplyAndDemand/releases/download"
+
+buildRelPath=$(
+  curl -fsSL "${canyonJob}/${CANYON_BUILD}/api/json" |
+    jq -r '.artifacts[0].relativePath'
+)
+buildNumber=$(
+  curl -fsSL "${canyonJob}/${CANYON_BUILD}/api/json" |
+    jq -r '.number'
+)
+baseName=$(basename "${buildRelPath}")
+
+# Add build tag to non-tagged builds for version detection
+if [ ${baseName%.*} = 'canyon-server' ]; then
+    export SERVER=${baseName%.*}_build${buildNumber}.jar
+else
+    export SERVER="${baseName}"
+fi
+
+if [ ! -f "$SERVER" ]; then
+    # If CANYON_BUILD is old artifact, then download from GitHub
+    if [ "${CANYON_BUILD}" = "final" ]; then
+        downloadUrl="${githubUrl}/finalcanyon/canyon-server.jar"
+        log "Downloading final Canyon build from $downloadUrl ..."
+    elif [ "${CANYON_BUILD}" = "6" ]; then
+        downloadUrl="${githubUrl}/CanyonRelease/Canyon-Build-6.jar"
+        log "Downloading Canyon build 6 from $downloadUrl ..."
+    elif [ "${CANYON_BUILD}" = "26" ]; then
+        downloadUrl="${githubUrl}/CanyonRelease/canyon-build-26.jar"
+        log "Downloading Canyon build 26 from $downloadUrl ..."
+    # Builds greater than 32 are on Jenkins
+    else
+        downloadUrl="${canyonJob}/${CANYON_BUILD}/artifact/${buildRelPath}"
+        log "Downloading Canyon build ${buildNumber} from $downloadUrl ..."
+    fi
+    curl -fsSL -o "$SERVER" "$downloadUrl"
+    if [ ! -f "$SERVER" ]; then
+      log "ERROR: failed to download from $downloadUrl (status=$?)"
+      exit 3
+    fi
+fi
+
+# Normalize on Spigot for later operations
+export FAMILY=SPIGOT
+
+exec ${SCRIPTS:-/}start-spiget "$@"
