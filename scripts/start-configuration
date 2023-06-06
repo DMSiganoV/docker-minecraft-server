@@ -2,13 +2,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+
 # shellcheck source=start-utils
 . "${SCRIPTS:-/}start-utils"
 
 : "${EULA:=}"
 : "${PROXY:=}"
-: "${ENABLE_AUTOPAUSE:=false}"
-: "${ENABLE_AUTOSTOP:=false}"
+: "${ENABLE_AUTOPAUSE:=true}"
+: "${ENABLE_AUTOSTOP:=true}"
 : "${RCON_CMDS_STARTUP:=}"
 : "${RCON_CMDS_ON_CONNECT:=}"
 : "${RCON_CMDS_ON_DISCONNECT:=}"
@@ -17,7 +18,7 @@ IFS=$'\n\t'
 : "${RCON_CMDS_PERIOD:=10}"
 : "${RCON_PASSWORD_FILE:=}"
 : "${ENABLE_RCON:=true}"
-: "${RCON_PASSWORD:=minecraft}"
+: "${RCON_PASSWORD:=minecraft1337}"
 : "${RCON_PORT:=25575}"
 export ENABLE_RCON RCON_PASSWORD RCON_PORT
 
