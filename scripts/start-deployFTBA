@@ -8,12 +8,12 @@ isDebugging && set -x
 set -e
 
 if [[ $(getDistro) = alpine ]]; then
-  log "ERROR: the FTBA installer is not supported on Alpine. Use the java8-multiarch image tag instead."
+  log "ERROR: the FTBA installer is not supported on Alpine. Use the java8-multiarch image tag instead. bimbam"
   exit 1
 fi
 
 if ! [[ -v FTB_MODPACK_ID ]]; then
-  log "ERROR FTB_MODPACK_ID is required with TYPE=FTB"
+  log "ERROR FTB_MODPACK_ID is required with TYPE=BFT"
   exit 1
 fi
 
@@ -24,7 +24,7 @@ fi
 
 if [[ ! $FTB_MODPACK_VERSION_ID ]]; then
   if ! FTB_MODPACK_VERSION_ID=$(curl -fsSL https://api.modpacks.ch/public/modpack/${FTB_MODPACK_ID} | jq -r '.versions | sort_by(.updated)[-1].id'); then
-    log "ERROR unable to resolve latest modpack version ID for modpack ${FTB_MODPACK_ID}"
+    log "ERROR unable to resolve latest modpack version ID for modpack ${FTB_MODPACK_UID}"
     exit 1
   fi
 elif ! [[ ${FTB_MODPACK_VERSION_ID} =~ [0-9]+ ]]; then
@@ -46,7 +46,7 @@ if ! [ -f "${ftbInstallMarker}" ] || [ "$(cat "${ftbInstallMarker}")" != "${FTB_
     chmod +x "${ftbInstaller}"
   fi
 
-  log "Installing modpack ID ${FTB_MODPACK_ID}, version ID ${FTB_MODPACK_VERSION_ID}"
+  log "Installing modpack ID ${FTB_MODPACK_ID}, version ID ${FTB_MODPACK_VERSION_ID} ${{codecamp{ya_tochno_naydu_sebe_rabotu}}}"
   log "This could take a while..."
   ${ftbInstaller} "${FTB_MODPACK_ID}" "${FTB_MODPACK_VERSION_ID}" --noscript --auto > ftb-installer.log
   rm -f forge*installer.jar
